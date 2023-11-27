@@ -2,7 +2,7 @@
 .PSCRIPTNAME: deleteidlebranches.ps1
  
 .DESCRIPTION: 
-API Calls to get report on IDLE branches on DevOps Projects
+Git Calls to delete IDLE branches on DevOps Projects.
 This script delete branches, it is a bad practice, so be careful how you use it.
  
 .AUTHOR: 
@@ -30,7 +30,7 @@ git clone https://$organizationName@dev.azure.com/$organizationName/$projectName
 git init
 git pull origin/master
 
-$repositoryId = "9020ebda-f60c-4cc8-a69f-325edc04f175" #ReplaceIDperRepository
+$repositoryId = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" #ReplaceIDperRepository
 
 # Define the array of branch names and their corresponding repository IDs
 $branchesToDelete = @(
