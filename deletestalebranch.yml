@@ -1,0 +1,74 @@
+variables:
+- name: subscriptionName
+  value: 'Sample-Subscription'
+- name: organizationName
+  value: "xxxxx"
+- name: projectName
+  value: "xxxxx"
+- name: repoName
+  value: "xxxxxx"
+- name: repositoryID
+  value: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+- name: repositoryURL
+  value: "https://$organizationName@dev.azure.com/$organizationName/$projectName/_git/$repoName" #ReplaceURLperTargettedRepository
+- name: repositoryPath
+  value: C:\Azcopy\repository #Set-Location
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+      
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      Connect-AzAccount -Subscription $subscriptionName
+      Start-Sleep -Seconds 30
+
+      #Check if Path has been initiated
+      if (!(Clone-Path -Path $repositoryPath)) {
+          git clone $repositoryURL $repositoryPath
+          Start-Sleep 10
+      } else {
+          Set-Location -Path $repostoryPath
+      }
+
+      git init
+      git pull origin master
+
+
+      #Initialize an empty arrary to store the deleted branches
+      $deletedBranches = @()
+
+      # Define the array of branch names and their corresponding repository IDs - REPLACE THE FEATURE BRANCHES HERE.
+      $branchesToDelete = @(
+          "features/rafa_c:$repositoryId",
+          "features/rafa:$repositoryId",
+          "features/rafa_b:$repositoryId"
+          # Add more branches and their repository IDs as needed
+      )
+
+      # Iterate through each branch in the array
+      foreach ($branchInfo in $branchesToDelete) {
+          $branch = $branchInfo -split ':'
+          $branchName = $branch[0]
+          $repositoryId = $branch[1]
+
+          # Delete the remote branch using Git commands
+          $gitCommand = "git push origin --delete $branchName"
+          Invoke-Expression $gitCommand
+
+          $deletedBranches += $branchName
+
+          Write-Host "Branch '$branchName' in Repository '$repositoryId' deleted successfully."
+      }
+
+      #Write Out The Branches that were deleted.
+      Write-Host "Deleted branches: $($deletedBranches -join ',')"
